@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import './GameShop.css';
 
 function GameShop() {
@@ -9,6 +10,7 @@ function GameShop() {
   const [wishlist, setWishlist] = useState([]);
   const [filter, setFilter] = useState('all');
   const apiKey = '50b08e21f28f47feacd53f489c0bf9d4';
+  const navigate = useNavigate();  // Hook for navigation
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -36,13 +38,6 @@ function GameShop() {
     fetchGameData();
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      fetchGameData();
-    }
-  };
-
   const handleAddToCart = (game) => {
     const newCart = [...cart, game];
     setCart(newCart);
@@ -53,6 +48,10 @@ function GameShop() {
     const newWishlist = [...wishlist, game];
     setWishlist(newWishlist);
     localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+  };
+
+  const handleGameClick = (game) => {
+    navigate(`/game/${game.id}`, { state: { game } });
   };
 
   const filteredGames = games.filter(game => {
@@ -66,15 +65,6 @@ function GameShop() {
     <div className="container">
       <div className="header">
         <h1>Online Game Shop</h1>
-        <form className="search-bar" onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Search for games..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button type="submit">Search</button>
-        </form>
         <select onChange={(e) => setFilter(e.target.value)} value={filter}>
           <option value="all">All Games</option>
           <option value="best-selling">Best Selling</option>
@@ -87,9 +77,8 @@ function GameShop() {
         {filteredGames.length > 0 ? (
           filteredGames.map(game => (
             <div key={game.id} className="game-card">
-              <img src={game.background_image} alt={game.name} />
-              <h2>{game.name}</h2>
-              <p>{game.description_raw || game.description || 'No description available.'}</p>
+              <img src={game.background_image} alt={game.name} onClick={() => handleGameClick(game)} />
+              <h2 onClick={() => handleGameClick(game)}>{game.name}</h2>
               <p>Price: ${game.price || 'Free'}</p>
               <button onClick={() => handleAddToCart(game)}>Add to Cart</button>
               <button onClick={() => handleAddToWishlist(game)}>Add to Wishlist</button>
